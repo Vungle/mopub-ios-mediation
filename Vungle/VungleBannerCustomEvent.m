@@ -103,15 +103,15 @@ static const CGFloat kVGNMoPubMRECWidthFor280Height = 336.0f;
         self.options = options.count ? options : nil;
 
         // generate view with size
-        UIView *mrecAdView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, self.bannerSize.width, self.bannerSize.height)];
+        UIView *bannerAdView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, self.bannerSize.width, self.bannerSize.height)];
 
         // router call to add ad view to view - should return the updated view.
-        mrecAdView = [[VungleRouter sharedRouter] renderBannerAdInView:mrecAdView options:self.options forPlacementID:self.placementId];
+        bannerAdView = [[VungleRouter sharedRouter] renderBannerAdInView:bannerAdView options:self.options forPlacementID:self.placementId];
         // if a view is returned, then we hit the methods below.
-        if (mrecAdView) {
+        if (bannerAdView) {
             // call router event to transmit close to SDK for report ad finalization / clean up
             [[VungleRouter sharedRouter] completeBannerAdViewForPlacementID:self.placementId];
-            [self.delegate bannerCustomEvent:self didLoadAd:mrecAdView];
+            [self.delegate bannerCustomEvent:self didLoadAd:bannerAdView];
             self.isAdCached = YES;
         } else {
             [self.delegate bannerCustomEvent:self didFailToLoadAdWithError:nil];

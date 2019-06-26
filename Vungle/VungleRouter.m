@@ -60,6 +60,7 @@ typedef NS_ENUM(NSUInteger, BannerRouterDelegateState) {
 
 @property (nonatomic, copy) NSString *bannerPlacementID;
 @property (nonatomic, strong) NSMutableArray *bannerDelegates;
+@property (nonatomic, strong) NSMutableDictionary *bannerAdPlacementDic;
 
 @end
 
@@ -72,6 +73,7 @@ typedef NS_ENUM(NSUInteger, BannerRouterDelegateState) {
         self.waitingListDic = [NSMutableDictionary dictionary];
         self.bannerDelegates = [NSMutableArray array];
         self.isAdPlaying = NO;
+        self.bannerAdPlacementDic = [NSMutableDictionary dictionary];
     }
     return self;
 }
@@ -213,10 +215,17 @@ typedef NS_ENUM(NSUInteger, BannerRouterDelegateState) {
         MPLogInfo(@"A banner ad type has been already instanciated. Multiple banner ads are not supported with Vungle iOS SDK version %@ and adapter version %@.", VungleSDKVersion, VungleAdapterVersion);
         [delegate vungleAdDidFailToLoad:nil];
         return;
+    } else if ([_bannerAdPlacementDic objectForKey:[info objectForKey:kVunglePlacementIdKey]]) {
+        MPLogInfo(@"A banner ad type has been already instanciated. Multiple banner ads are not supported with Vungle iOS SDK version %@ and adapter version %@.", VungleSDKVersion, VungleAdapterVersion);
+        [delegate vungleAdDidFailToLoad:nil];
     }
 
-    if ([self validateInfoData:info] && CGSizeEqualToSize(size, kVGNMRECSize)) {
-        self.bannerPlacementID = [info objectForKey:kVunglePlacementIdKey];
+    if ([self validateInfoData:info] && (CGSizeEqualToSize(size, MOPUB_MEDIUM_RECT_SIZE) || CGSizeEqualToSize(size, MOPUB_BANNER_SIZE) || CGSizeEqualToSize(size, MOPUB_LEADERBOARD_SIZE))) {
+        if (CGSizeEqualToSize(size, MOPUB_MEDIUM_RECT_SIZE)) {
+            self.bannerPlacementID = [info objectForKey:kVunglePlacementIdKey];
+        } else {
+            self.bannerAdPlacementDic[[info objectForKey:kVunglePlacementIdKey]] = [NSValue valueWithCGSize:size];
+        }
 
         if (self.sdkInitializeState == SDKInitializeStateNotInitialized) {
             if (![self.waitingListDic objectForKey:[info objectForKey:kVunglePlacementIdKey]]) {
@@ -229,7 +238,7 @@ typedef NS_ENUM(NSUInteger, BannerRouterDelegateState) {
             }
         } else if (self.sdkInitializeState == SDKInitializeStateInitialized) {
             NSString *placementID = [info objectForKey:kVunglePlacementIdKey];
-            [self requestBannerMrecAdWithPlacementID:placementID delegate:delegate];
+            [self requestBannerAdWithPlacementID:placementID size:size delegate:delegate];
         }
     } else {
         // if size is incorrect, should we send that back as an error response?
@@ -254,7 +263,7 @@ typedef NS_ENUM(NSUInteger, BannerRouterDelegateState) {
     }
 }
 
-- (void)requestBannerMrecAdWithPlacementID:(NSString *)placementID delegate:(id<VungleRouterDelegate>)delegate {
+- (void)requestBannerAdWithPlacementID:(NSString *)placementID size:(CGSize)size delegate:(id<VungleRouterDelegate>)delegate {
     NSMutableDictionary *tempDic = [NSMutableDictionary dictionary];
     if ([[VungleSDK sharedSDK]  isAdCachedForPlacementID:placementID]) {
         [delegate vungleAdDidLoad];
@@ -268,7 +277,7 @@ typedef NS_ENUM(NSUInteger, BannerRouterDelegateState) {
         [self.bannerDelegates addObject:tempDic];
 
         NSError *error = nil;
-        if ([[VungleSDK sharedSDK] loadPlacementWithID:placementID error:&error]) {
+        if ([[VungleSDK sharedSDK] loadPlacementWithID:placementID withSize:(CGSizeEqualToSize(size, MOPUB_MEDIUM_RECT_SIZE) ? CGSizeZero : size) error:&error]) {
             NSLog(@"Vungle: Start to load an ad for Placement ID :%@", placementID);
         } else {
             if (error) {
@@ -351,6 +360,7 @@ typedef NS_ENUM(NSUInteger, BannerRouterDelegateState) {
 - (void)completeBannerAdViewForPlacementID:(NSString *)placementID {
     if (placementID) {
         NSLog(@"Vungle: Triggering an ad completion call for %@", placementID);
+        // TODO
         for (int i = 0; i < self.bannerDelegates.count; i++) {
             if ((BannerRouterDelegateState)[[self.bannerDelegates[i] valueForKey:kVungleBannerDelegateStateKey] intValue] == BannerRouterDelegateStatePlaying) {
                 [[VungleSDK sharedSDK] finishedDisplayingAd];
@@ -421,9 +431,10 @@ typedef NS_ENUM(NSUInteger, BannerRouterDelegateState) {
 - (void)clearWaitingList {
     for (id key in self.waitingListDic) {
         id<VungleRouterDelegate> delegateInstance = [self.waitingListDic objectForKey:key];
-        if ([[delegateInstance getPlacementID] isEqualToString:self.bannerPlacementID]) {
+        if ([[delegateInstance getPlacementID] isEqualToString:self.bannerPlacementID] || [self.bannerAdPlacementDic objectForKey:[delegateInstance getPlacementID]]) {
             NSString *tempPlacementID = [delegateInstance getPlacementID];
-            [self requestBannerMrecAdWithPlacementID:tempPlacementID delegate:delegateInstance];
+            CGSize size = [[delegateInstance getPlacementID] isEqualToString:self.bannerPlacementID] ? MOPUB_MEDIUM_RECT_SIZE : [(NSValue *)[self.bannerAdPlacementDic objectForKey:[delegateInstance getPlacementID]] CGSizeValue];
+            [self requestBannerAdWithPlacementID:tempPlacementID size:size delegate:delegateInstance];
         }
         else {
             if (![self.delegatesDic objectForKey:key]) {
@@ -455,7 +466,7 @@ typedef NS_ENUM(NSUInteger, BannerRouterDelegateState) {
 }
 
 - (void)vungleAdPlayabilityUpdate:(BOOL)isAdPlayable placementID:(NSString *)placementID error:(NSError *)error {
-    if ([placementID isEqualToString:self.bannerPlacementID]) {
+    if ([placementID isEqualToString:self.bannerPlacementID] || [self.bannerAdPlacementDic objectForKey:placementID]) {
         for (int i = 0; i < self.bannerDelegates.count; i++) {
             if ((BannerRouterDelegateState)[[self.bannerDelegates[i] valueForKey:kVungleBannerDelegateStateKey] intValue] == BannerRouterDelegateStateRequesting) {
                 if (isAdPlayable) {
@@ -498,7 +509,7 @@ typedef NS_ENUM(NSUInteger, BannerRouterDelegateState) {
 
 - (void)vungleWillShowAdForPlacementID:(nullable NSString *)placementID {
     id<VungleRouterDelegate> targetDelegate;
-    if ([placementID isEqualToString:self.bannerPlacementID]) {
+    if ([placementID isEqualToString:self.bannerPlacementID] || [self.bannerAdPlacementDic objectForKey:placementID]) {
         for (int i = 0; i < self.bannerDelegates.count; i++) {
             if ((BannerRouterDelegateState)[[self.bannerDelegates[i] valueForKey:kVungleBannerDelegateStateKey] intValue] == BannerRouterDelegateStateCached) {
                 targetDelegate = [self.bannerDelegates[i] objectForKey:kVungleBannerDelegateKey];
@@ -524,7 +535,7 @@ typedef NS_ENUM(NSUInteger, BannerRouterDelegateState) {
 
 - (void)vungleWillCloseAdWithViewInfo:(VungleViewInfo *)info placementID:(NSString *)placementID {
     id<VungleRouterDelegate> targetDelegate;
-    if ([placementID isEqualToString:self.bannerPlacementID]) {
+    if ([placementID isEqualToString:self.bannerPlacementID] || [self.bannerAdPlacementDic objectForKey:placementID]) {
         for (int i = 0; i < self.bannerDelegates.count; i++) {
             if ((BannerRouterDelegateState)[[self.bannerDelegates[i] valueForKey:kVungleBannerDelegateStateKey] intValue] == BannerRouterDelegateStateClosing) {
                 targetDelegate = [self.bannerDelegates[i] objectForKey:kVungleBannerDelegateKey];
@@ -551,7 +562,7 @@ typedef NS_ENUM(NSUInteger, BannerRouterDelegateState) {
 
 - (void)vungleDidCloseAdWithViewInfo:(VungleViewInfo *)info placementID:(NSString *)placementID {
     id<VungleRouterDelegate> targetDelegate;
-    if ([placementID isEqualToString:self.bannerPlacementID]) {
+    if ([placementID isEqualToString:self.bannerPlacementID] ||  [self.bannerAdPlacementDic objectForKey:placementID]) {
         for (int i = 0; i < self.bannerDelegates.count; i++) {
             if ((BannerRouterDelegateState)[[self.bannerDelegates[i] valueForKey:kVungleBannerDelegateStateKey] intValue] == BannerRouterDelegateStateClosing) {
                 targetDelegate = [self.bannerDelegates[i] objectForKey:kVungleBannerDelegateKey];
