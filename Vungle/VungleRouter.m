@@ -86,8 +86,18 @@ typedef NS_ENUM(NSUInteger, BannerRouterDelegateState) {
 - (void)collectConsentStatusFromMoPub {
     // Collect and pass the user's consent from MoPub onto the Vungle SDK
     if ([[MoPub sharedInstance] isGDPRApplicable] == MPBoolYes) {
-        BOOL canCollectPersonalInfo = [[MoPub sharedInstance] canCollectPersonalInfo];
-        [[VungleSDK sharedSDK] updateConsentStatus:(canCollectPersonalInfo) ? VungleConsentAccepted : VungleConsentDenied consentMessageVersion:@""];
+        if ([[MoPub sharedInstance] allowLegitimateInterest] == YES) {
+            if ([[MoPub sharedInstance] currentConsentStatus] == MPConsentStatusDenied
+                || [[MoPub sharedInstance] currentConsentStatus] == MPConsentStatusDoNotTrack
+                || [[MoPub sharedInstance] currentConsentStatus] == MPConsentStatusPotentialWhitelist) {
+                [[VungleSDK sharedSDK] updateConsentStatus:(VungleConsentDenied) consentMessageVersion:@""];
+            } else {
+                [[VungleSDK sharedSDK] updateConsentStatus:(VungleConsentAccepted) consentMessageVersion:@""];
+            }
+        } else {
+            BOOL canCollectPersonalInfo = [[MoPub sharedInstance] canCollectPersonalInfo];
+            [[VungleSDK sharedSDK] updateConsentStatus:(canCollectPersonalInfo) ? VungleConsentAccepted : VungleConsentDenied consentMessageVersion:@""];
+        }
     }
 }
 
