@@ -14,7 +14,7 @@
 #endif
 #import "VungleInstanceMediationSettings.h"
 
-static NSString *const VungleAdapterVersion = @"6.4.1";
+static NSString *const VungleAdapterVersion = @"6.4.2.0";
 
 NSString *const kVungleAppIdKey = @"appId";
 NSString *const kVunglePlacementIdKey = @"pid";
@@ -534,10 +534,6 @@ typedef NS_ENUM(NSUInteger, BannerRouterDelegateState) {
     }
 
     if(targetDelegate) {
-        if ([info.didDownload isEqual:@YES]) {
-            [targetDelegate vungleAdWasTapped];
-        }
-
         if ([info.completedView boolValue] && [targetDelegate respondsToSelector:@selector(vungleAdShouldRewardUser)]) {
             [targetDelegate vungleAdShouldRewardUser];
         }
