@@ -163,4 +163,8 @@ static const CGFloat kVGNMoPubMRECWidthFor280Height = 336.0f;
     return self.placementId;
 }
 
+- (CGSize)getBannerSize {
+    return self.bannerSize;
+}
+
 @end
