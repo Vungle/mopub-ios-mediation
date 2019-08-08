@@ -119,6 +119,7 @@ typedef NS_ENUM(NSUInteger, BannerRouterDelegateState) {
         self.sdkInitializeState = SDKInitializeStateInitializing;
         dispatch_async(dispatch_get_main_queue(), ^{
             NSError * error = nil;
+            //Disable refresh functionality for all banners
             [[VungleSDK sharedSDK] disableBannerRefresh];
             [[VungleSDK sharedSDK] startWithAppId:appId error:&error];
             [[VungleSDK sharedSDK] setDelegate:self];
