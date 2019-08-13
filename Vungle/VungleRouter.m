@@ -14,7 +14,7 @@
 #endif
 #import "VungleInstanceMediationSettings.h"
 
-static NSString *const VungleAdapterVersion = @"6.4.3.0";
+static NSString *const VungleAdapterVersion = @"6.5.0.0";
 
 NSString *const kVungleAppIdKey = @"appId";
 NSString *const kVunglePlacementIdKey = @"pid";
@@ -257,7 +257,7 @@ typedef NS_ENUM(NSUInteger, BannerRouterDelegateState) {
         MPLogInfo(@"Vungle: Start to load an ad for Placement ID :%@", placementId);
     } else {
         if (error) {
-            MPLogInfo(@"Vungle: Unable to load an ad for Placement ID :%@, Error %@", placementId, error);
+            MPLogError(@"Vungle: Unable to load an ad for Placement ID :%@, Error %@", placementId, error);
         }
         [delegate vungleAdDidFailToLoad:error];
     }
@@ -275,11 +275,11 @@ typedef NS_ENUM(NSUInteger, BannerRouterDelegateState) {
         [tempDic setObject:delegate forKey:kVungleBannerDelegateKey];
         [tempDic setObject:[NSNumber numberWithInt:BannerRouterDelegateStateRequesting] forKey:kVungleBannerDelegateStateKey];
         [self.bannerDelegates addObject:tempDic];
-        
+
         NSError *error = nil;
         if (CGSizeEqualToSize(size, MOPUB_MEDIUM_RECT_SIZE)) {
             if ([[VungleSDK sharedSDK] loadPlacementWithID:placementID error:&error]) {
-                NSLog(@"Vungle: Start to load an ad for Placement ID :%@", placementID);
+                MPLogInfo(@"Vungle: Start to load an ad for Placement ID :%@", placementID);
             } else {
                 [self requestBannerAdFailedWithError:error
                                          placementID:placementID
@@ -287,7 +287,7 @@ typedef NS_ENUM(NSUInteger, BannerRouterDelegateState) {
             }
         } else {
             if ([[VungleSDK sharedSDK] loadPlacementWithID:placementID withSize:[self getVungleBannerAdSizeType:size] error:&error]) {
-                NSLog(@"Vungle: Start to load an ad for Placement ID :%@", placementID);
+                MPLogInfo(@"Vungle: Start to load an ad for Placement ID :%@", placementID);
             } else {
                 [self requestBannerAdFailedWithError:error
                                          placementID:placementID
@@ -362,13 +362,13 @@ typedef NS_ENUM(NSUInteger, BannerRouterDelegateState) {
     } else {
         bannerError = [NSError errorWithDomain:@"com.vungle.sdk" code:8769 userInfo:@{ NSLocalizedDescriptionKey : [NSString stringWithFormat:@"Ad not cached for placement %@", placementID]}];
     }
-    NSLog(@"Banner loading error: %@", bannerError.localizedDescription);
+    MPLogError(@"Banner loading error: %@", bannerError.localizedDescription);
     return nil;
 }
 
 - (void)completeBannerAdViewForPlacementID:(NSString *)placementID {
     if (placementID) {
-        NSLog(@"Vungle: Triggering an ad completion call for %@", placementID);
+        MPLogInfo(@"Vungle: Triggering an ad completion call for %@", placementID);
         for (int i = 0; i < self.bannerDelegates.count; i++) {
             if ((BannerRouterDelegateState)[[self.bannerDelegates[i] valueForKey:kVungleBannerDelegateStateKey] intValue] == BannerRouterDelegateStatePlaying) {
                 [[VungleSDK sharedSDK] finishedDisplayingAd];
@@ -469,7 +469,7 @@ typedef NS_ENUM(NSUInteger, BannerRouterDelegateState) {
                            placementID:(NSString *)placementID
                               delegate:(id<VungleRouterDelegate>)delegate {
     if (error) {
-        NSLog(@"Vungle: Unable to load an ad for Placement ID :%@, Error %@", placementID, error);
+        MPLogError(@"Vungle: Unable to load an ad for Placement ID :%@, Error %@", placementID, error);
     }
     [delegate vungleAdDidFailToLoad:error];
 }
