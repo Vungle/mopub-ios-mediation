@@ -211,10 +211,10 @@ typedef NS_ENUM(NSUInteger, BannerRouterDelegateState) {
     [self collectConsentStatusFromMoPub];
 
     // Verify if PlacementID is nil (first MREC or banner request) or PlacementID is the same one requested
-    if (self.mrecPlacementID != nil && ![[info objectForKey:kVunglePlacementIdKey] isEqualToString:self.mrecPlacementID]) {
+    if (self.mrecPlacementID != nil && ![[info objectForKey:kVunglePlacementIdKey] isEqualToString:self.mrecPlacementID] && CGSizeEqualToSize(size, MOPUB_MEDIUM_RECT_SIZE)) {
         MPLogInfo(@"A MREC ad type has been already instantiated. Multiple MREC ads are not supported with Vungle iOS SDK version %@ and adapter version %@.", VungleSDKVersion, VungleAdapterVersion);
         [delegate vungleAdDidFailToLoad:nil];
-    } else if (self.bannerPlacementID != nil && ![[info objectForKey:kVunglePlacementIdKey] isEqualToString:self.bannerPlacementID]) {
+    } else if (self.bannerPlacementID != nil && ![[info objectForKey:kVunglePlacementIdKey] isEqualToString:self.bannerPlacementID] && (!CGSizeEqualToSize(size, MOPUB_MEDIUM_RECT_SIZE))) {
         MPLogInfo(@"A banner ad type has been already instantiated. Multiple banner ads are not supported with Vungle iOS SDK version %@ and adapter version %@.", VungleSDKVersion, VungleAdapterVersion);
         [delegate vungleAdDidFailToLoad:nil];
         return;
