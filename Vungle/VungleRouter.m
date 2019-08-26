@@ -373,13 +373,6 @@ typedef NS_ENUM(NSUInteger, BannerRouterDelegateState) {
             if ((BannerRouterDelegateState)[[self.bannerDelegates[i] valueForKey:kVungleBannerDelegateStateKey] intValue] == BannerRouterDelegateStatePlaying) {
                 [[VungleSDK sharedSDK] finishedDisplayingAd];
                 [self.bannerDelegates[i] setObject:[NSNumber numberWithInt:BannerRouterDelegateStateClosing] forKey:kVungleBannerDelegateStateKey];
-                // Set MREC/Banner placement to nil after finishing playing MREC/Banner ad,
-                // so adapter can load next MREC/Banner with different placement ID.
-                if ([self.mrecPlacementID isEqualToString:placementID]) {
-                    self.mrecPlacementID = nil;
-                } else if ([self.bannerPlacementID isEqualToString:placementID]) {
-                    self.bannerPlacementID = nil;
-                }
             }
         }
     }
@@ -613,6 +606,14 @@ typedef NS_ENUM(NSUInteger, BannerRouterDelegateState) {
 
     if (targetDelegate) {
         [targetDelegate vungleAdDidDisappear];
+    }
+    
+    // Set MREC/Banner placement to nil after finishing playing MREC/Banner ad,
+    // so adapter can load next MREC/Banner with different placement ID.
+    if ([placementID isEqualToString:self.mrecPlacementID]){
+        self.mrecPlacementID = nil;
+    } else if ([placementID isEqualToString:self.bannerPlacementID]) {
+        self.bannerPlacementID = nil;
     }
 }
 
