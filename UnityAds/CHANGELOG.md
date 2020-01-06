@@ -1,5 +1,8 @@
 
 ## Changelog
+* 3.4.0.0
+  * This version of the adapters has been certified with Untiy Ads 3.4.0.
+  
 * 3.3.0.1
   * Update adapter to handle Unity Ads load behaviors seamlessly for fullscreen ads.
   * Fix incompatible type warning for MoPub `logLevel`. 
