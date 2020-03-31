@@ -7,7 +7,6 @@
 
 #import <Foundation/Foundation.h>
 #import <VungleSDK/VungleSDK.h>
-#import <VungleSDK/VungleSDKHeaderBidding.h>
 #import <VungleSDK/VungleSDKNativeAds.h>
 
 extern NSString *const kVungleAppIdKey;
@@ -41,7 +40,7 @@ extern const CGSize kVNGLeaderboardBannerSize;
 - (void)requestRewardedVideoAdWithCustomEventInfo:(NSDictionary *)info delegate:(id<VungleRouterDelegate>)delegate;
 - (void)requestBannerAdWithCustomEventInfo:(NSDictionary *)info size:(CGSize)size delegate:(id<VungleRouterDelegate>)delegate;
 - (BOOL)isAdAvailableForPlacementId:(NSString *)placementId;
-- (NSString*)currentSuperToken;
+- (NSString *)currentSuperToken;
 - (void)presentInterstitialAdFromViewController:(UIViewController *)viewController options:(NSDictionary *)options forPlacementId:(NSString *)placementId;
 - (void)presentRewardedVideoAdFromViewController:(UIViewController *)viewController customerId:(NSString *)customerId settings:(VungleInstanceMediationSettings *)settings forPlacementId:(NSString *)placementId;
 - (UIView *)renderBannerAdInView:(UIView *)bannerView options:(NSDictionary *)options forPlacementID:(NSString *)placementID size:(CGSize)size;

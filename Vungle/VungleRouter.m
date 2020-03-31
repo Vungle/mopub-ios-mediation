@@ -14,6 +14,7 @@
 #endif
 #import "VungleInstanceMediationSettings.h"
 #import "VungleAdapterConfiguration.h"
+#import <VungleSDK/VungleSDKHeaderBidding.h>
 
 NSString *const kVungleAppIdKey = @"appId";
 NSString *const kVunglePlacementIdKey = @"pid";
@@ -316,7 +317,6 @@ typedef NS_ENUM(NSUInteger, BannerRouterDelegateState) {
 }
 
 - (NSString *)currentSuperToken {
-
     if (self.sdkInitializeState == SDKInitializeStateInitialized) {
         return [[VungleSDK sharedSDK] currentSuperToken];
     }
