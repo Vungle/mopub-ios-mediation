@@ -12,9 +12,9 @@
     #import "MPRewardedVideo.h"
     #import "MoPub.h"
 #endif
+#import <VungleSDK/VungleSDKHeaderBidding.h>
 #import "VungleInstanceMediationSettings.h"
 #import "VungleAdapterConfiguration.h"
-#import <VungleSDK/VungleSDKHeaderBidding.h>
 
 NSString *const kVungleAppIdKey = @"appId";
 NSString *const kVunglePlacementIdKey = @"pid";
