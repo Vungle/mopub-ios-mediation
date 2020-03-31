@@ -315,6 +315,14 @@ typedef NS_ENUM(NSUInteger, BannerRouterDelegateState) {
     return [[VungleSDK sharedSDK] isAdCachedForPlacementID:placementId withSize:[self getVungleBannerAdSizeType:size]];
 }
 
+- (NSString *)currentSuperToken {
+
+    if (self.sdkInitializeState == SDKInitializeStateInitialized) {
+        return [[VungleSDK sharedSDK] currentSuperToken];
+    }
+    return nil;
+}
+
 - (void)presentInterstitialAdFromViewController:(UIViewController *)viewController options:(NSDictionary *)options forPlacementId:(NSString *)placementId {
     if (!self.isAdPlaying && [self isAdAvailableForPlacementId:placementId]) {
         self.isAdPlaying = YES;
