@@ -321,7 +321,7 @@ typedef NS_ENUM(NSUInteger, BannerRouterDelegateState) {
     }
 }
 
-- (BOOL)isAdAvailableForPlacementId:(NSString *) placementId
+- (BOOL)isAdAvailableForPlacementId:(NSString *)placementId
 {
     return [[VungleSDK sharedSDK] isAdCachedForPlacementID:placementId];
 }
