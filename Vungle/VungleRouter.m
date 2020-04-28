@@ -121,7 +121,7 @@ typedef NS_ENUM(NSUInteger, BannerRouterDelegateState) {
         [[VungleSDK sharedSDK] performSelector:@selector(setPluginName:version:) withObject:@"mopub" withObject:[[[VungleAdapterConfiguration alloc] init] adapterVersion]];
 #pragma clang diagnostic pop
        
-        // Get delegate instance and set kinit options
+        // Get delegate instance and set init options
         NSString *placementID = [info objectForKey:kVunglePlacementIdKey];
         id<VungleRouterDelegate> delegateInstance = [self.waitingListDict objectForKey:placementID];
         NSMutableDictionary *initOptions = [NSMutableDictionary dictionary];
