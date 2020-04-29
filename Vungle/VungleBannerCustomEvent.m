@@ -33,6 +33,11 @@
 
 - (void)requestAdWithSize:(CGSize)size customEventInfo:(NSDictionary *)info adMarkup:(NSString *)adMarkup
 {
+    if ([[[UIDevice currentDevice] systemVersion] compare:@"10.0" options:NSNumericSearch] == NSOrderedAscending) {
+        MPLogError(@"Vungle only serves Banner ad on system version greater than or equal to 10.0.");
+        return;
+    }
+
     self.placementId = [info objectForKey:kVunglePlacementIdKey];
     self.options = nil;
     
