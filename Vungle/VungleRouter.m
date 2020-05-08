@@ -561,10 +561,10 @@ typedef NS_ENUM(NSUInteger, BannerRouterDelegateState) {
         } else {
             if (![self.delegatesDict objectForKey:key]) {
                 [self.delegatesDict setObject:delegateInstance forKey:key];
-                
-                if (!needRequestAd) {
-                    continue;
-                }
+            }
+            
+            if (!needRequestAd) {
+                continue;
             }
             
             NSError *error = nil;
