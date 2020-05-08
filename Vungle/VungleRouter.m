@@ -129,7 +129,7 @@ typedef NS_ENUM(NSUInteger, BannerRouterDelegateState) {
         
         if (placementID.length && delegateInstance) {
             [initOptions setObject:placementID forKey:VungleSDKInitOptionKeyPriorityPlacementID];
-            self.prioritizedPlacementID = placementID;
+            self.prioritizedPlacementID = [placementID copy];
 
             NSInteger priorityPlacementAdSize = 1;
             if ([delegateInstance respondsToSelector:@selector(getBannerSize)]) {
