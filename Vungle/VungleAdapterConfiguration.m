@@ -69,7 +69,12 @@ typedef NS_ENUM(NSInteger, VungleAdapterErrorCode) {
         self.shouldCollectDeviceId = [configuration[kVungleSDKCollectDevice] boolValue];
         [VungleRouter.sharedRouter setShouldCollectDeviceId:self.shouldCollectDeviceId];
     }
-    
+
+    if (configuration[kVungleSDKCCPAStatus]) {
+        VungleCCPAStatus vungleCCPAStatus = (VungleCCPAStatus)[configuration[kVungleSDKCCPAStatus] integerValue];
+        [VungleRouter.sharedRouter setCCPAStatus:vungleCCPAStatus];
+    }
+
     NSMutableDictionary *sizeOverrideDict = [NSMutableDictionary dictionary];
     if (configuration[kVNGSDKOptionsMinSpaceForInit]) {
         [sizeOverrideDict setValue:configuration[kVNGSDKOptionsMinSpaceForInit] forKey:kVungleSDKMinSpaceForInit];

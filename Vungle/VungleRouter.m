@@ -25,6 +25,7 @@ NSString * const kVungleStartMuted = @"muted";
 NSString * const kVungleSupportedOrientations = @"orientations";
 
 NSString * const kVungleSDKCollectDevice = @"collectDevice";
+NSString * const kVungleSDKCCPAStatus = @"vungleCCPAStatus";
 NSString * const kVungleSDKMinSpaceForInit = @"vungleMinimumFileSystemSizeForInit";
 NSString * const kVungleSDKMinSpaceForAdRequest = @"vungleMinimumFileSystemSizeForAdRequest";
 NSString * const kVungleSDKMinSpaceForAssetLoad = @"vungleMinimumFileSystemSizeForAssetDownload";
@@ -157,6 +158,11 @@ typedef NS_ENUM(NSUInteger, BannerRouterDelegateState) {
     if (self.sdkInitializeState == SDKInitializeStateNotInitialized) {
         [VungleSDK setPublishIDFV:shouldCollectDeviceId];
     }
+}
+
+- (void)setCCPAStatus:(VungleCCPAStatus)vungleCCPAStatus
+{
+    [[VungleSDK sharedSDK] updateCCPAStatus:vungleCCPAStatus];
 }
 
 - (void)setSDKOptions:(NSDictionary *)sdkOptions

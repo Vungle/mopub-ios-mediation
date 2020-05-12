@@ -17,6 +17,7 @@ extern NSString * const kVungleOrdinal;
 extern NSString * const kVungleStartMuted;
 extern NSString * const kVungleSupportedOrientations;
 extern NSString * const kVungleSDKCollectDevice;
+extern NSString * const kVungleSDKCCPAStatus;
 extern NSString * const kVungleSDKMinSpaceForInit;
 extern NSString * const kVungleSDKMinSpaceForAdRequest;
 extern NSString * const kVungleSDKMinSpaceForAssetLoad;
@@ -35,6 +36,7 @@ extern const CGSize kVNGLeaderboardBannerSize;
 
 - (void)initializeSdkWithInfo:(NSDictionary *)info;
 - (void)setShouldCollectDeviceId:(BOOL)shouldCollectDeviceId;
+- (void)setCCPAStatus:(VungleCCPAStatus)vungleCCPAStatus;
 - (void)setSDKOptions:(NSDictionary *)sdkOptions;
 - (void)requestInterstitialAdWithCustomEventInfo:(NSDictionary *)info delegate:(id<VungleRouterDelegate>)delegate;
 - (void)requestRewardedVideoAdWithCustomEventInfo:(NSDictionary *)info delegate:(id<VungleRouterDelegate>)delegate;
