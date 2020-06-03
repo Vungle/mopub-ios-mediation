@@ -294,6 +294,7 @@ typedef NS_ENUM(NSUInteger, BannerRouterDelegateState) {
     @synchronized (self ) {
         NSMutableDictionary *dictionary = [NSMutableDictionary dictionary];
         if ([self isBannerAdAvailableForPlacementId:placementID size:size]) {
+            MPLogInfo(@"Vungle: Banner ad already cached for Placement ID :%@", placementID);
             [delegate vungleAdDidLoad];
 
             [dictionary setObject:delegate forKey:kVungleBannerDelegateKey];
@@ -439,7 +440,7 @@ typedef NS_ENUM(NSUInteger, BannerRouterDelegateState) {
 {
     @synchronized (self) {
         if (placementID.length > 0) {
-            MPLogInfo(@"Vungle: Triggering an ad completion call for %@", placementID);
+            MPLogInfo(@"Vungle: Triggering a Banner ad completion call for %@", placementID);
             for (int i = 0; i < self.bannerDelegates.count; i++) {
                 if (([[(id<VungleRouterDelegate>)[self.bannerDelegates[i] valueForKey:kVungleBannerDelegateKey] getPlacementID] isEqualToString:placementID]) && ((BannerRouterDelegateState)[[self.bannerDelegates[i] valueForKey:kVungleBannerDelegateStateKey] intValue] == BannerRouterDelegateStatePlaying)) {
                     [[VungleSDK sharedSDK] finishDisplayingAd:placementID];
@@ -595,9 +596,12 @@ typedef NS_ENUM(NSUInteger, BannerRouterDelegateState) {
     if (error) {
         MPLogError(@"Vungle: Unable to load an ad for Placement ID :%@, Error %@", placementID, error);
     } else {
+        NSString *errorMessage = [NSString stringWithFormat:@"Vungle: Unable to load an ad for Placement ID :%@.", placementID];
         error = [NSError errorWithCode:MOPUBErrorAdapterFailedToLoadAd
-                  localizedDescription:[NSString stringWithFormat:@"Vungle: Unable to load an ad for Placement ID :%@.", placementID]];
+                  localizedDescription:errorMessage];
+        MPLogError(@"%@", errorMessage);
     }
+
     [delegate vungleAdDidFailToLoad:error];
 }
 
@@ -653,6 +657,7 @@ typedef NS_ENUM(NSUInteger, BannerRouterDelegateState) {
 
     if ([self.delegatesDict objectForKey:placementID]) {
         if (isAdPlayable) {
+            MPLogInfo(@"Ad playability update returned ad is playable for Placement ID: %@", placementID);
             [[self.delegatesDict objectForKey:placementID] vungleAdDidLoad];
         } else {
             NSError *playabilityError = nil;
@@ -660,7 +665,9 @@ typedef NS_ENUM(NSUInteger, BannerRouterDelegateState) {
                 MPLogInfo(@"Vungle: Ad playability update returned error for Placement ID: %@, Error: %@", placementID, error.localizedDescription);
                 playabilityError = error;
             } else {
-                playabilityError = [NSError errorWithCode:MOPUBErrorAdapterFailedToLoadAd localizedDescription:@"Vungle: Ad playability update returned Ad is not playable."];
+                NSString *message = [NSString stringWithFormat:@"Vungle: Ad playability update returned Ad is not playable for Placement ID: %@.", placementID];
+                MPLogInfo(@"%@", message);
+                playabilityError = [NSError errorWithCode:MOPUBErrorAdapterFailedToLoadAd localizedDescription:message];
             }
 
             if (!self.isAdPlaying) {
@@ -673,6 +680,7 @@ typedef NS_ENUM(NSUInteger, BannerRouterDelegateState) {
             for (int i = 0; i < self.bannerDelegates.count; i++) {
                 if (([[(id<VungleRouterDelegate>)[self.bannerDelegates[i] valueForKey:kVungleBannerDelegateKey] getPlacementID] isEqualToString:placementID]) && ((BannerRouterDelegateState)[[self.bannerDelegates[i] valueForKey:kVungleBannerDelegateStateKey] intValue] == BannerRouterDelegateStateRequesting)) {
                     if (isAdPlayable) {
+                        MPLogInfo(@"Ad playability update returned ad is playable for Placement ID: %@", placementID);
                         [[self.bannerDelegates[i] objectForKey:kVungleBannerDelegateKey] vungleAdDidLoad];
                         [self.bannerDelegates[i] setObject:[NSNumber numberWithInt:BannerRouterDelegateStateCached] forKey:kVungleBannerDelegateStateKey];
                     } else {
@@ -681,7 +689,9 @@ typedef NS_ENUM(NSUInteger, BannerRouterDelegateState) {
                             MPLogInfo(@"Vungle: Ad playability update returned error for Placement ID: %@, Error: %@", placementID, error.localizedDescription);
                             playabilityError = error;
                         } else {
-                            playabilityError = [NSError errorWithCode:MOPUBErrorAdapterFailedToLoadAd localizedDescription:@"Vungle: Ad playability update returned Ad is not playable."];
+                            NSString *message = [NSString stringWithFormat:@"Vungle: Ad playability update returned Ad is not playable for Placement ID: %@.", placementID];
+                            MPLogInfo(@"%@", message);
+                            playabilityError = [NSError errorWithCode:MOPUBErrorAdapterFailedToLoadAd localizedDescription:message];
                         }
                         [[self.bannerDelegates[i] objectForKey:kVungleBannerDelegateKey] vungleAdDidFailToLoad:playabilityError];
 
