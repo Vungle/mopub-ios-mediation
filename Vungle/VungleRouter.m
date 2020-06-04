@@ -262,7 +262,7 @@ typedef NS_ENUM(NSUInteger, BannerRouterDelegateState) {
             [self requestBannerAdWithPlacementID:placementID size:size delegate:delegate needRequestAd:YES];
         }
     } else {
-        MPLogError(@"A banner ad type was requested with the size which Vungle SDK doesn't support.");
+        MPLogError(@"Vungle: A banner ad type was requested with the size which Vungle SDK doesn't support.");
         [delegate vungleAdDidFailToLoad:nil];
     }
 }
@@ -432,7 +432,7 @@ typedef NS_ENUM(NSUInteger, BannerRouterDelegateState) {
         bannerError = [NSError errorWithDomain:NSStringFromClass([self class]) code:8769 userInfo:@{ NSLocalizedDescriptionKey : [NSString stringWithFormat:@"Ad not cached for placement %@", placementID]}];
     }
     
-    MPLogError(@"Banner loading error: %@", bannerError.localizedDescription);
+    MPLogError(@"Vungle: Banner loading error: %@", bannerError.localizedDescription);
     return nil;
 }
 
@@ -657,7 +657,7 @@ typedef NS_ENUM(NSUInteger, BannerRouterDelegateState) {
 
     if ([self.delegatesDict objectForKey:placementID]) {
         if (isAdPlayable) {
-            MPLogInfo(@"Ad playability update returned ad is playable for Placement ID: %@", placementID);
+            MPLogInfo(@"Vungle: Ad playability update returned ad is playable for Placement ID: %@", placementID);
             [[self.delegatesDict objectForKey:placementID] vungleAdDidLoad];
         } else {
             NSError *playabilityError = nil;
@@ -680,7 +680,7 @@ typedef NS_ENUM(NSUInteger, BannerRouterDelegateState) {
             for (int i = 0; i < self.bannerDelegates.count; i++) {
                 if (([[(id<VungleRouterDelegate>)[self.bannerDelegates[i] valueForKey:kVungleBannerDelegateKey] getPlacementID] isEqualToString:placementID]) && ((BannerRouterDelegateState)[[self.bannerDelegates[i] valueForKey:kVungleBannerDelegateStateKey] intValue] == BannerRouterDelegateStateRequesting)) {
                     if (isAdPlayable) {
-                        MPLogInfo(@"Ad playability update returned ad is playable for Placement ID: %@", placementID);
+                        MPLogInfo(@"Vungle: Ad playability update returned ad is playable for Placement ID: %@", placementID);
                         [[self.bannerDelegates[i] objectForKey:kVungleBannerDelegateKey] vungleAdDidLoad];
                         [self.bannerDelegates[i] setObject:[NSNumber numberWithInt:BannerRouterDelegateStateCached] forKey:kVungleBannerDelegateStateKey];
                     } else {
