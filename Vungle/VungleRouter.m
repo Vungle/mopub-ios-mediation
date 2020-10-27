@@ -544,7 +544,7 @@ typedef NS_ENUM(NSUInteger, SDKInitializeState) {
 
                 if ([self isAdAvailableForPlacementId:key]) {
                     [delegateInstance vungleAdDidLoad];
-                    return;
+                    continue;
                 }
 
                 NSError *error = nil;
