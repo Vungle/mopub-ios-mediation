@@ -1,6 +1,7 @@
 ## Changelog
 * 6.9.0.0
     * This version of the adapters has been certified with Vungle 6.9.0 and MoPub SDK 5.15.0.
+    * Remove VungleSDKResetPlacementForDifferentAdSize error check for loading Ads.
 
 * 6.8.1.1
     * Add support for `fullscreenAdAdapterAdDidDismiss:` to signal that the fullscreen ad is closing and the state should be reset. To use this adapter version, you need v5.15.0 of the MoPub iOS SDK at the minimum.
@@ -13,7 +14,6 @@
 
 * 6.8.0.0
     * This version of the adapters has been certified with Vungle 6.8.0 and MoPub SDK 5.13.1.
-    * Remove VungleSDKResetPlacementForDifferentAdSize error check for loading Ads.
 
 * 6.7.1.0
     * This version of the adapters has been certified with Vungle 6.7.1 and MoPub SDK 5.13.1.
