@@ -652,8 +652,12 @@ typedef NS_ENUM(NSUInteger, SDKInitializeState) {
         return;
     }
 
-    NSString *message = error ? [NSString stringWithFormat:@"Vungle: Ad playability update returned error for Placement ID: %@, Error: %@", placementID, error.localizedDescription] : [NSString stringWithFormat:@"Vungle: Ad playability update returned Ad is not playable for Placement ID: %@.", placementID];
-    NSError *playabilityError = error ? : [NSError errorWithCode:MOPUBErrorAdapterFailedToLoadAd localizedDescription:message];
+    NSString *message = nil;
+    NSError *playabilityError = nil;
+    if (!isAdPlayable) {
+        message = error ? [NSString stringWithFormat:@"Vungle: Ad playability update returned error for Placement ID: %@, Error: %@", placementID, error.localizedDescription] : [NSString stringWithFormat:@"Vungle: Ad playability update returned Ad is not playable for Placement ID: %@.", placementID];
+        playabilityError = error ? : [NSError errorWithCode:MOPUBErrorAdapterFailedToLoadAd localizedDescription:message];
+    }
 
     @synchronized (self) {
         if (self.sdkInitializeState == SDKInitializeStateNotInitialized && !isAdPlayable) {
