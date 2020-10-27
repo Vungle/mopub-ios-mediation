@@ -1,4 +1,7 @@
 ## Changelog
+* 6.9.0.0
+    * This version of the adapters has been certified with Vungle 6.9.0 and MoPub SDK 5.14.1.
+
 * 6.8.1.0
     * This version of the adapters has been certified with Vungle 6.8.1 and MoPub SDK 5.14.1.
 
