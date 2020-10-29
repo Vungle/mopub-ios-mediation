@@ -315,15 +315,9 @@ typedef NS_ENUM(NSUInteger, SDKInitializeState) {
                 if ([[VungleSDK sharedSDK] loadPlacementWithID:placementID withSize:[self getVungleBannerAdSizeType:size] error:&error]) {
                     MPLogInfo(@"Vungle: Start to load an ad for Placement ID :%@", placementID);
                 } else {
-                    if (!error) {
-                        NSString *errorMessage = [NSString stringWithFormat:@"Vungle: Unable to load an ad for Placement ID: %@.", placementID];
-                        error = [NSError errorWithCode:MOPUBErrorAdapterFailedToLoadAd
-                                  localizedDescription:errorMessage];
-                    }
                     [self requestBannerAdFailedWithError:error
                                              placementID:placementID
                                                 delegate:delegate];
-                    MPLogError(@"%@", error);
                 }
             }
         }
@@ -529,38 +523,41 @@ typedef NS_ENUM(NSUInteger, SDKInitializeState) {
 
 - (void)clearWaitingList
 {
-    @synchronized (self) {
-        for (id key in self.waitingListDict) {
-            id<VungleRouterDelegate> delegateInstance = [self.waitingListDict objectForKey:key];
+    for (id key in self.waitingListDict) {
+        id<VungleRouterDelegate> delegateInstance = [self.waitingListDict objectForKey:key];
 
-            if ([delegateInstance respondsToSelector:@selector(getBannerSize)]) {
-                NSString *id = [delegateInstance getPlacementID];
-                CGSize size = [delegateInstance getBannerSize];
-                [self requestBannerAdWithPlacementID:id size:size delegate:delegateInstance];
+        if ([delegateInstance respondsToSelector:@selector(getBannerSize)]) {
+            NSString *id = [delegateInstance getPlacementID];
+            CGSize size = [delegateInstance getBannerSize];
+            [self requestBannerAdWithPlacementID:id size:size delegate:delegateInstance];
+        } else {
+            if (![self.delegatesDict objectForKey:key]) {
+                [self.delegatesDict setObject:delegateInstance forKey:key];
+            }
+
+            if ([self isAdAvailableForPlacementId:key]) {
+                [delegateInstance vungleAdDidLoad];
+                continue;
+            }
+
+            NSError *error = nil;
+            if ([[VungleSDK sharedSDK] loadPlacementWithID:key error:&error]) {
+                MPLogInfo(@"Vungle: Start to load an ad for Placement ID :%@", key);
             } else {
-                if (![self.delegatesDict objectForKey:key]) {
-                    [self.delegatesDict setObject:delegateInstance forKey:key];
-                }
-
-                if ([self isAdAvailableForPlacementId:key]) {
-                    [delegateInstance vungleAdDidLoad];
-                    continue;
-                }
-
-                NSError *error = nil;
-                if ([[VungleSDK sharedSDK] loadPlacementWithID:key error:&error]) {
-                    MPLogInfo(@"Vungle: Start to load an ad for Placement ID :%@", key);
+                if (error) {
+                    MPLogError(@"Vungle: Unable to load an ad for Placement ID :%@, Error %@", key, error);
                 } else {
-                    if (error) {
-                        MPLogInfo(@"Vungle: Unable to load an ad for Placement ID :%@, Error %@", key, error);
-                    }
-                    [delegateInstance vungleAdDidFailToLoad:error];
+                    NSString *errorMessage = [NSString stringWithFormat:@"Vungle: Unable to load an ad for Placement ID :%@.", key];
+                    error = [NSError errorWithCode:MOPUBErrorAdapterFailedToLoadAd
+                              localizedDescription:errorMessage];
+                    MPLogError(@"%@", errorMessage);
                 }
+                [delegateInstance vungleAdDidFailToLoad:error];
             }
         }
-
-        [self.waitingListDict removeAllObjects];
     }
+
+    [self.waitingListDict removeAllObjects];
 }
 
 - (void)requestBannerAdFailedWithError:(NSError *)error
@@ -657,17 +654,6 @@ typedef NS_ENUM(NSUInteger, SDKInitializeState) {
     if (!isAdPlayable) {
         message = error ? [NSString stringWithFormat:@"Vungle: Ad playability update returned error for Placement ID: %@, Error: %@", placementID, error.localizedDescription] : [NSString stringWithFormat:@"Vungle: Ad playability update returned Ad is not playable for Placement ID: %@.", placementID];
         playabilityError = error ? : [NSError errorWithCode:MOPUBErrorAdapterFailedToLoadAd localizedDescription:message];
-    }
-
-    @synchronized (self) {
-        if (self.sdkInitializeState == SDKInitializeStateNotInitialized && !isAdPlayable) {
-            if ([self.waitingListDict objectForKey:placementID]) {
-                id<VungleRouterDelegate> delegate = [self.waitingListDict objectForKey:placementID];
-                [delegate vungleAdDidFailToLoad:playabilityError];
-                [self.waitingListDict removeObjectForKey:placementID];
-                return;
-            }
-        }
     }
 
     if ([self.delegatesDict objectForKey:placementID]) {
