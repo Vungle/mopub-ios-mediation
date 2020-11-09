@@ -724,8 +724,21 @@ typedef NS_ENUM(NSUInteger, SDKInitializeState) {
     }
 }
 
-- (void)vungleAdViewedForPlacement:(NSString *)placementID {
-    MPLogInfo(@"Vungle: Receive 'vungleAdViewedForPlacement' event for Placement ID: %@.", placementID);
+- (void)vungleAdViewedForPlacement:(NSString *)placementID
+{
+    if (!placementID.length) {
+        return;
+    }
+
+    id<VungleRouterDelegate> targetDelegate = [self.delegatesDict objectForKey:placementID];
+    if (!targetDelegate) {
+        @synchronized (self) {
+            targetDelegate =
+            [self getBannerDelegateWithPlacement:placementID
+                                 withBannerState:BannerRouterDelegateStatePlaying];
+        }
+    }
+    [targetDelegate vungleAdViewed];
 }
 
 - (void)vungleWillCloseAdForPlacementID:(nonnull NSString *)placementID
