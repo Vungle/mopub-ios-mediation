@@ -150,7 +150,7 @@
 
 - (void)vungleAdViewed
 {
-    MPLogInfo(@"Vungle Interstitial Ad did viewed");
+    MPLogInfo(@"Vungle Interstitial Ad did view");
     [self.delegate fullscreenAdAdapterDidTrackImpression:self];
 }
 

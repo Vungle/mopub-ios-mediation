@@ -217,7 +217,7 @@
 
 - (void)vungleAdViewed
 {
-    MPLogInfo(@"Vungle video banner did viewed");
+    MPLogInfo(@"Vungle video banner did view");
     [self.delegate inlineAdAdapterDidTrackImpression:self];
 }
 

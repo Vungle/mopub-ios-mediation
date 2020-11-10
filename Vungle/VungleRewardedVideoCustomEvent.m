@@ -113,7 +113,7 @@
 
 - (void)vungleAdViewed
 {
-    MPLogInfo(@"Vungle Rewarded Video Ad did viewed");
+    MPLogInfo(@"Vungle Rewarded Video Ad did view");
     [self.delegate fullscreenAdAdapterDidTrackImpression:self];
 }
 
