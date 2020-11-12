@@ -120,7 +120,7 @@
             }
         }
         
-        NSString *ordinal = [self.localExtras objectForKey:kVungleUserId];
+        NSString *ordinal = [self.localExtras objectForKey:kVungleOrdinal];
         if (ordinal != nil) {
             NSNumber *ordinalPlaceholder = [NSNumber numberWithLongLong:[ordinal longLongValue]];
             NSUInteger ordinal = ordinalPlaceholder.unsignedIntegerValue;
