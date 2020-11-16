@@ -4,6 +4,7 @@
     * Remove VungleSDKResetPlacementForDifferentAdSize error check for loading Ads.
     * Fix the issue that fullscreen ads fail to load.
     * Introduce the new SDK delegate callback `vungleAdViewedForPlacement:` to track views.
+    * Remove invalid play option keys.
 
 * 6.8.1.0
     * This version of the adapters has been certified with Vungle 6.8.1 and MoPub SDK 5.14.1.
