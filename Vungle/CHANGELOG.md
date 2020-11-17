@@ -4,6 +4,7 @@
     * Remove VungleSDKResetPlacementForDifferentAdSize error check for loading Ads.
     * Fix the issue that fullscreen ads fail to load.
     * Introduce the new SDK delegate callback `vungleAdViewedForPlacement:` to track views.
+    * Remove invalid play option keys.
 
 * 6.8.1.1
     * Add support for `fullscreenAdAdapterAdDidDismiss:` to signal that the fullscreen ad is closing and the state should be reset. To use this adapter version, you need v5.15.0 of the MoPub iOS SDK at the minimum.
