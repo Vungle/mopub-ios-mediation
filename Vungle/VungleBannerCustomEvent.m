@@ -210,7 +210,10 @@
 - (void)vungleAdViewed
 {
     MPLogInfo(@"Vungle video banner did view");
-    [self.delegate inlineAdAdapterDidTrackImpression:self];
+    __weak VungleBannerCustomEvent *weakself = self;
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [weakself.delegate inlineAdAdapterDidTrackImpression:weakself];
+    });
 }
 
 - (void)vungleAdDidDisappear {
