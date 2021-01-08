@@ -19,6 +19,8 @@ static NSString * const kAdapterErrorDomain = @"com.mopub.mopub-ios-sdk.mopub-vu
 NSString * const kVNGSDKOptionsMinSpaceForInit = @"vngMinSpaceForInit";
 NSString * const kVNGSDKOptionsMinSpaceForAdLoad = @"vngMinSpaceForAdLoad";
 
+static NSString *bidToken = nil;
+
 typedef NS_ENUM(NSInteger, VungleAdapterErrorCode) {
     VungleAdapterErrorCodeMissingAppId,
 };
@@ -45,7 +47,11 @@ typedef NS_ENUM(NSInteger, VungleAdapterErrorCode) {
 }
 
 - (NSString *)biddingToken {
-    NSString *bidToken = [[VungleRouter sharedRouter] currentSuperToken];
+    NSString *token = [[VungleRouter sharedRouter] currentSuperToken];
+    if (token.length) {
+        bidToken = token;
+    }
+    MPLogInfo(@"Vungle: Get bid token: %@.", bidToken);
     return bidToken;
 }
 
