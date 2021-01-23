@@ -16,6 +16,7 @@
 
 @property (nonatomic, copy) NSString *placementId;
 @property (nonatomic, copy) NSString *adMarkup;
+@property (nonatomic, copy) NSString *eventId;
 @property (nonatomic, copy) NSDictionary *options;
 @property (nonatomic, assign) NSDictionary *bannerInfo;
 @property (nonatomic, assign) NSTimer *timeOutTimer;
@@ -41,6 +42,11 @@
     self.placementId = [info objectForKey:kVunglePlacementIdKey];
     self.adMarkup = adMarkup;
     self.options = nil;
+    if (adMarkup) {
+        NSData *data = [adMarkup dataUsingEncoding:NSUTF8StringEncoding];
+        id adMarkupDict = [NSJSONSerialization JSONObjectWithData:data options:0 error:nil];
+        self.eventId = [adMarkupDict objectForKey:kVungleAdEventId];
+    }
     
     NSString *format = [info objectForKey:@"adunit_format"];
     BOOL isMediumRectangleFormat = (format != nil ? [[format lowercaseString] containsString:@"medium_rectangle"] : NO);
@@ -74,7 +80,7 @@
 
 - (void)dealloc
 {
-    [[VungleRouter sharedRouter] completeBannerAdViewForPlacementID:self.placementId];
+    [[VungleRouter sharedRouter] completeBannerAdViewForDelegate:self];
 }
 
 - (CGSize)sizeForCustomEventInfo:(CGSize)size
@@ -190,6 +196,11 @@
 - (NSString *)getAdMarkup
 {
     return self.adMarkup;
+}
+
+- (NSString *)getEventId
+{
+    return self.eventId;
 }
 
 - (CGSize)getBannerSize

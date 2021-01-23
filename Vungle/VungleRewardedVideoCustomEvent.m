@@ -21,6 +21,7 @@
 
 @property (nonatomic, copy) NSString *placementId;
 @property (nonatomic, copy) NSString *adMarkup;
+@property (nonatomic, copy) NSString *eventId;
 @property (nonatomic) BOOL isAdLoaded;
 
 @end
@@ -55,6 +56,11 @@
 {
     self.placementId = [info objectForKey:kVunglePlacementIdKey];
     self.adMarkup = adMarkup;
+    if (adMarkup) {
+        NSData *data = [adMarkup dataUsingEncoding:NSUTF8StringEncoding];
+        id adMarkupDict = [NSJSONSerialization JSONObjectWithData:data options:0 error:nil];
+        self.eventId = [adMarkupDict objectForKey:kVungleAdEventId];
+    }
 
     // Cache the initialization parameters
     [VungleAdapterConfiguration updateInitializationParameters:info];
@@ -82,7 +88,7 @@
 
 - (void)cleanUp
 {
-    [[VungleRouter sharedRouter] clearDelegateForPlacementId:self.placementId];
+    [[VungleRouter sharedRouter] cleanupFullScreenDelegate:self];
 }
 
 #pragma mark - MPVungleDelegate
@@ -179,6 +185,11 @@
 - (NSString *)getAdMarkup
 {
     return self.adMarkup;
+}
+
+- (NSString *)getEventId
+{
+    return self.eventId;
 }
 
 - (void)rewardUser
