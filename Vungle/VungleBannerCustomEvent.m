@@ -42,11 +42,7 @@
     self.placementId = [info objectForKey:kVunglePlacementIdKey];
     self.adMarkup = adMarkup;
     self.options = nil;
-    if (adMarkup) {
-        NSData *data = [adMarkup dataUsingEncoding:NSUTF8StringEncoding];
-        id adMarkupDict = [NSJSONSerialization JSONObjectWithData:data options:0 error:nil];
-        self.eventId = [adMarkupDict objectForKey:kVungleAdEventId];
-    }
+    self.eventId = [[VungleRouter sharedRouter] parseEventId:adMarkup];
     
     NSString *format = [info objectForKey:@"adunit_format"];
     BOOL isMediumRectangleFormat = (format != nil ? [[format lowercaseString] containsString:@"medium_rectangle"] : NO);

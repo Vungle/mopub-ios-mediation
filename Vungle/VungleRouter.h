@@ -53,6 +53,7 @@ extern const CGSize kVNGLeaderboardBannerSize;
 - (VungleConsentStatus) getCurrentConsentStatus;
 - (void)cleanupFullScreenDelegate:(id<VungleRouterDelegate>)delegate;
 - (void)clearDelegateForRequestingBanner;
+- (NSString *)parseEventId:(NSString *)adMarkup;
 
 @end
 
