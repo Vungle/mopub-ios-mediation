@@ -587,7 +587,7 @@ typedef NS_ENUM(NSUInteger, SDKInitializeState) {
             CGSize size = [delegateInstance getBannerSize];
             [self requestBannerAdWithPlacementID:placementId size:size delegate:delegateInstance];
         } else {
-            [self requestAdWithCustomEventInfo:info delegate:delegateInstance];
+            [self requestAdWithCustomEventInfo:nil delegate:delegateInstance];
         }
     }
 
