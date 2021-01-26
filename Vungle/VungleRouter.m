@@ -310,7 +310,7 @@ typedef NS_ENUM(NSUInteger, SDKInitializeState) {
             }
         }
         
-        if ([self isBannerAdAvailableForPlacementId:placementID size:size delegate:delegate]) {
+        if ([self isBannerAdAvailableForDelegate:delegate]) {
             MPLogInfo(@"Vungle: Banner ad already cached for Placement ID :%@", placementID);
             delegate.bannerState = BannerRouterDelegateStateCached;
             [delegate vungleAdDidLoad];
@@ -344,13 +344,16 @@ typedef NS_ENUM(NSUInteger, SDKInitializeState) {
     return [[VungleSDK sharedSDK] isAdCachedForPlacementID:[delegate getPlacementID] adMarkup:[delegate getAdMarkup]];
 }
 
-- (BOOL)isBannerAdAvailableForPlacementId:(NSString *)placementId size:(CGSize)size delegate:(id<VungleRouterDelegate>)delegate
+- (BOOL)isBannerAdAvailableForDelegate:(id<VungleRouterDelegate>)delegate
 {
+    CGSize size = [delegate getBannerSize];
+    NSString *placementId = [delegate getPlacementID];
+    NSString *adMarkup = [delegate getAdMarkup];
     if (CGSizeEqualToSize(size, kVNGMRECSize)) {
-        return [[VungleSDK sharedSDK] isAdCachedForPlacementID:placementId adMarkup:[delegate getAdMarkup]];
+        return [[VungleSDK sharedSDK] isAdCachedForPlacementID:placementId adMarkup:adMarkup];
     }
 
-    return [[VungleSDK sharedSDK] isAdCachedForPlacementID:placementId adMarkup:[delegate getAdMarkup]
+    return [[VungleSDK sharedSDK] isAdCachedForPlacementID:placementId adMarkup:adMarkup
                                                   withSize:[self getVungleBannerAdSizeType:size]];
 }
 
@@ -432,7 +435,7 @@ typedef NS_ENUM(NSUInteger, SDKInitializeState) {
 {
     NSError *bannerError = nil;
     
-    if ([self isBannerAdAvailableForPlacementId:placementID size:size delegate:delegate]) {
+    if ([self isBannerAdAvailableForDelegate:delegate]) {
         BOOL success = [[VungleSDK sharedSDK] addAdViewToView:bannerView withOptions:options placementID:placementID adMarkup:[delegate getAdMarkup] error:&bannerError];
         
         if (success) {
