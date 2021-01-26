@@ -255,8 +255,7 @@ typedef NS_ENUM(NSUInteger, SDKInitializeState) {
         } else if (self.sdkInitializeState == SDKInitializeStateInitializing) {
             [self addToWaitingListWithDelegate:delegate];
         } else if (self.sdkInitializeState == SDKInitializeStateInitialized) {
-            NSString *placementID = [info objectForKey:kVunglePlacementIdKey];
-            [self requestBannerAdWithPlacementID:placementID size:size delegate:delegate];
+            [self requestBannerAdWithDelegate:delegate];
         }
     } else {
         MPLogError(@"Vungle: A banner ad type was requested with the size which Vungle SDK doesn't support.");
@@ -295,12 +294,12 @@ typedef NS_ENUM(NSUInteger, SDKInitializeState) {
     }
 }
 
-- (void)requestBannerAdWithPlacementID:(NSString *)placementID
-                                  size:(CGSize)size
-                              delegate:(id<VungleRouterDelegate>)delegate
+- (void)requestBannerAdWithDelegate:(id<VungleRouterDelegate>)delegate
 {
     @synchronized (self) {
+        NSString *placementID = [delegate getPlacementID];
         NSString *eventId = [delegate getEventId];
+        CGSize size = [delegate getBannerSize];
         if (eventId.length > 0) {
             if (![self.hbBannerDelegates objectForKey:eventId]) {
                 [self.hbBannerDelegates setObject:delegate forKey:eventId];
@@ -489,7 +488,7 @@ typedef NS_ENUM(NSUInteger, SDKInitializeState) {
 
 - (NSString *)parseEventId:(NSString *)adMarkup
 {
-    if (adMarkup) {
+    if (adMarkup.length > 0) {
         NSData *data = [adMarkup dataUsingEncoding:NSUTF8StringEncoding];
         id adMarkupDict = [NSJSONSerialization JSONObjectWithData:data options:0 error:nil];
         return [adMarkupDict objectForKey:kVungleAdEventId];
@@ -562,7 +561,9 @@ typedef NS_ENUM(NSUInteger, SDKInitializeState) {
 {
     NSString *eventId = [delegate getEventId];
     if (eventId.length > 0) {
-        [self.hbWaitingListDict setObject:delegate forKey:eventId];
+        if (![self.hbWaitingListDict objectForKey:eventId]) {
+            [self.hbWaitingListDict setObject:delegate forKey:eventId];
+        }
     } else {
         NSString *placementId = [delegate getPlacementID];
         if (![self.waitingListDict objectForKey:placementId]) {
@@ -581,11 +582,9 @@ typedef NS_ENUM(NSUInteger, SDKInitializeState) {
 {
     for (id key in waitingListDict) {
         id<VungleRouterDelegate> delegateInstance = [waitingListDict objectForKey:key];
-        NSString *placementId = [delegateInstance getPlacementID];
         
         if ([delegateInstance respondsToSelector:@selector(getBannerSize)]) {
-            CGSize size = [delegateInstance getBannerSize];
-            [self requestBannerAdWithPlacementID:placementId size:size delegate:delegateInstance];
+            [self requestBannerAdWithDelegate:delegateInstance];
         } else {
             [self requestAdWithCustomEventInfo:nil delegate:delegateInstance];
         }
@@ -687,7 +686,7 @@ typedef NS_ENUM(NSUInteger, SDKInitializeState) {
     @synchronized (self) {
         NSString *key = [delegate getEventId];
         NSMapTable<NSString *, id<VungleRouterDelegate>> *delegateTable;
-        if (key) {
+        if (key.length > 0) {
             delegateTable = self.hbBannerDelegates;
         } else {
             key = [delegate getPlacementID];
@@ -770,7 +769,7 @@ typedef NS_ENUM(NSUInteger, SDKInitializeState) {
     if (!placementID.length) {
         return;
     }
-    
+
     id<VungleRouterDelegate> targetDelegate = [self getFullScreenDelegateWithPlacement:placementID eventID:eventID];
     if (!targetDelegate) {
         @synchronized (self) {
@@ -804,7 +803,7 @@ typedef NS_ENUM(NSUInteger, SDKInitializeState) {
     if (!placementID.length) {
         return;
     }
-    
+
     id<VungleRouterDelegate> targetDelegate = [self getFullScreenDelegateWithPlacement:placementID eventID:eventID];
     if (!targetDelegate) {
         @synchronized (self) {
@@ -833,7 +832,7 @@ typedef NS_ENUM(NSUInteger, SDKInitializeState) {
     if (!placementID.length) {
         return;
     }
-    
+
     id<VungleRouterDelegate> targetDelegate = [self getFullScreenDelegateWithPlacement:placementID eventID:eventID];
     if (!targetDelegate) {
         @synchronized (self) {
