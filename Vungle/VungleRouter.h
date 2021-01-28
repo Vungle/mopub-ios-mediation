@@ -6,6 +6,7 @@
 //
 
 #import <Foundation/Foundation.h>
+#import <VungleSDK/VungleSDKHeaderBidding.h>
 #import <VungleSDK/VungleSDK.h>
 #import <VungleSDK/VungleSDKNativeAds.h>
 
@@ -29,7 +30,7 @@ extern const CGSize kVNGLeaderboardBannerSize;
 @protocol VungleRouterDelegate;
 @class VungleInstanceMediationSettings;
 
-@interface VungleRouter : NSObject <VungleSDKDelegate, VungleSDKNativeAds>
+@interface VungleRouter : NSObject <VungleSDKDelegate, VungleSDKNativeAds, VungleSDKHBDelegate>
 
 + (VungleRouter *)sharedRouter;
 
