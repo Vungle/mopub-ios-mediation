@@ -807,16 +807,16 @@ typedef NS_ENUM(NSUInteger, SDKInitializeState) {
 
 - (void)vungleDidShowAdForPlacementID:(nullable NSString *)placementID
 {
-    [self vungleDidShowAdForPlacementID:placementID eventId:nil];
+    [self vungleDidShowAdForPlacementID:placementID eventID:nil];
 }
 
 - (void)vungleDidShowAdForEventID:(nullable NSString *)eventID
 {
-    [self vungleDidShowAdForPlacementID:nil eventId:eventID];
+    [self vungleDidShowAdForPlacementID:nil eventID:eventID];
 }
 
 - (void)vungleDidShowAdForPlacementID:(NSString *)placementID
-                              eventId:(NSString*)eventID
+                              eventID:(NSString *)eventID
 {
     id<VungleRouterDelegate> targetDelegate = [self getFullScreenDelegateWithPlacement:placementID eventID:eventID];
     if ([targetDelegate respondsToSelector:@selector(vungleAdDidAppear)]) {
@@ -918,7 +918,7 @@ typedef NS_ENUM(NSUInteger, SDKInitializeState) {
     if (!placementID.length) {
         return;
     }
-    [self vungleTrackClickForPlacementID:placementID eventId:nil];
+    [self vungleTrackClickForPlacementID:placementID eventID:nil];
 }
 
 - (void)vungleTrackClickForEventID:(nullable NSString *)eventID
@@ -926,11 +926,11 @@ typedef NS_ENUM(NSUInteger, SDKInitializeState) {
     if (!eventID.length) {
         return;
     }
-    [self vungleTrackClickForPlacementID:nil eventId:eventID];
+    [self vungleTrackClickForPlacementID:nil eventID:eventID];
 }
 
 - (void)vungleTrackClickForPlacementID:(NSString *)placementID
-                               eventId:(NSString *)eventID
+                               eventID:(NSString *)eventID
 {
     id<VungleRouterDelegate> targetDelegate = [self getDelegateWithPlacement:placementID
                                                                      eventID:eventID
