@@ -829,7 +829,7 @@ typedef NS_ENUM(NSUInteger, SDKInitializeState) {
     if (!placementID.length) {
         return;
     }
-    [self vungleAdViewedForPlacement:placementID eventId:nil];
+    [self vungleAdViewedForPlacement:placementID eventID:nil];
 }
 
 - (void)vungleAdViewedForAdUnit:(nullable NSString *)eventID
@@ -837,11 +837,11 @@ typedef NS_ENUM(NSUInteger, SDKInitializeState) {
     if (!eventID.length) {
         return;
     }
-    [self vungleAdViewedForPlacement:nil eventId:eventID];
+    [self vungleAdViewedForPlacement:nil eventID:eventID];
 }
 
 - (void)vungleAdViewedForPlacement:(NSString *)placementID
-                           eventId:(NSString*)eventID
+                           eventID:(NSString *)eventID
 {
     id<VungleRouterDelegate> targetDelegate = [self getFullScreenDelegateWithPlacement:placementID eventID:eventID];
     if (!targetDelegate) {
@@ -857,16 +857,16 @@ typedef NS_ENUM(NSUInteger, SDKInitializeState) {
 
 - (void)vungleWillCloseAdForPlacementID:(nonnull NSString *)placementID
 {
-    [self vungleWillCloseAdForPlacementID:placementID eventId:nil];
+    [self vungleWillCloseAdForPlacementID:placementID eventID:nil];
 }
 
 - (void)vungleWillCloseAdForEventID:(nonnull NSString *)eventID
 {
-    [self vungleWillCloseAdForPlacementID:nil eventId:eventID];
+    [self vungleWillCloseAdForPlacementID:nil eventID:eventID];
 }
 
 - (void)vungleWillCloseAdForPlacementID:(NSString *)placementID
-                                eventId:(NSString*)eventID
+                                eventID:(NSString *)eventID
 {
     id<VungleRouterDelegate> targetDelegate = [self getFullScreenDelegateWithPlacement:placementID eventID:eventID];
     if ([targetDelegate respondsToSelector:@selector(vungleAdWillDisappear)]) {
@@ -880,7 +880,7 @@ typedef NS_ENUM(NSUInteger, SDKInitializeState) {
     if (!placementID.length) {
         return;
     }
-    [self vungleDidCloseAdForPlacementID:placementID eventId:nil];
+    [self vungleDidCloseAdForPlacementID:placementID eventID:nil];
 }
 
 - (void)vungleDidCloseAdForEventID:(nonnull NSString *)eventID
@@ -888,11 +888,11 @@ typedef NS_ENUM(NSUInteger, SDKInitializeState) {
     if (!eventID.length) {
         return;
     }
-    [self vungleDidCloseAdForPlacementID:nil eventId:eventID];
+    [self vungleDidCloseAdForPlacementID:nil eventID:eventID];
 }
 
 - (void)vungleDidCloseAdForPlacementID:(NSString *)placementID
-                               eventId:(NSString*)eventID
+                               eventID:(NSString *)eventID
 {
     id<VungleRouterDelegate> targetDelegate = [self getFullScreenDelegateWithPlacement:placementID eventID:eventID];
     if (!targetDelegate) {
@@ -940,16 +940,16 @@ typedef NS_ENUM(NSUInteger, SDKInitializeState) {
 
 - (void)vungleRewardUserForPlacementID:(nullable NSString *)placementID
 {
-    [self vungleRewardUserForPlacementID:placementID eventId:nil];
+    [self vungleRewardUserForPlacementID:placementID eventID:nil];
 }
 
 - (void)vungleRewardUserForEventID:(nullable NSString *)eventID
 {
-    [self vungleRewardUserForPlacementID:nil eventId:eventID];
+    [self vungleRewardUserForPlacementID:nil eventID:eventID];
 }
 
 - (void)vungleRewardUserForPlacementID:(NSString *)placementID
-                               eventId:(NSString*)eventID
+                               eventID:(NSString *)eventID
 {
     id<VungleRouterDelegate> targetDelegate = [self getFullScreenDelegateWithPlacement:placementID eventID:eventID];
     if ([targetDelegate respondsToSelector:@selector(vungleAdRewardUser)]) {
@@ -959,16 +959,16 @@ typedef NS_ENUM(NSUInteger, SDKInitializeState) {
 
 - (void)vungleWillLeaveApplicationForPlacementID:(nullable NSString *)placementID
 {
-    [self vungleWillLeaveApplicationForPlacementID:placementID eventId:nil];
+    [self vungleWillLeaveApplicationForPlacementID:placementID eventID:nil];
 }
 
 - (void)vungleWillLeaveApplicationForEventID:(nullable NSString *)eventID
 {
-    [self vungleWillLeaveApplicationForPlacementID:nil eventId:eventID];
+    [self vungleWillLeaveApplicationForPlacementID:nil eventID:eventID];
 }
 
 - (void)vungleWillLeaveApplicationForPlacementID:(NSString *)placementID
-                                         eventId:(NSString*)eventID
+                                         eventID:(NSString *)eventID
 {
     id<VungleRouterDelegate> targetDelegate = [self getDelegateWithPlacement:placementID
                                                                      eventID:eventID
