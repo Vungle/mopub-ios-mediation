@@ -642,11 +642,11 @@ typedef NS_ENUM(NSUInteger, SDKInitializeState) {
 - (id<VungleRouterDelegate>)getFullScreenDelegateWithPlacement:(NSString *)placementID
                                                        eventID:(NSString *)eventID
 {
-    if (placementID.length) {
-        return [self.delegatesDict objectForKey:placementID];
-    }
     if (eventID.length > 0) {
         return [self.hbDelegatesDict objectForKey:eventID];
+    }
+    if (placementID.length) {
+        return [self.delegatesDict objectForKey:placementID];
     }
     return nil;
 }
@@ -654,11 +654,11 @@ typedef NS_ENUM(NSUInteger, SDKInitializeState) {
 - (id<VungleRouterDelegate>)getBannerDelegateWithPlacement:(NSString *)placementID
                                                    eventID:(NSString *)eventID
 {
-    if (placementID.length) {
-        return [self.bannerDelegates objectForKey:placementID];
-    }
     if (eventID.length > 0) {
         return [self.hbBannerDelegates objectForKey:eventID];
+    }
+    if (placementID.length) {
+        return [self.bannerDelegates objectForKey:placementID];
     }
     return nil;
 }
