@@ -47,11 +47,8 @@ typedef NS_ENUM(NSUInteger, SDKInitializeState) {
 @property (nonatomic) SDKInitializeState sdkInitializeState;
 
 @property (nonatomic) NSMutableDictionary *waitingListDict;
-@property (nonatomic) NSMutableDictionary *hbWaitingListDict;
 @property (nonatomic) NSMapTable<NSString *, id<VungleRouterDelegate>> *delegatesDict;
-@property (nonatomic) NSMapTable<NSString *, id<VungleRouterDelegate>> *hbDelegatesDict;
 @property (nonatomic) NSMapTable<NSString *, id<VungleRouterDelegate>> *bannerDelegates;
-@property (nonatomic) NSMapTable<NSString *, id<VungleRouterDelegate>> *hbBannerDelegates;
 
 @end
 
@@ -66,11 +63,6 @@ typedef NS_ENUM(NSUInteger, SDKInitializeState) {
         self.waitingListDict = [NSMutableDictionary dictionary];
         self.bannerDelegates = [NSMapTable mapTableWithKeyOptions:NSPointerFunctionsStrongMemory
                                                      valueOptions:NSPointerFunctionsWeakMemory];
-        self.hbWaitingListDict = [NSMutableDictionary dictionary];
-        self.hbDelegatesDict = [NSMapTable mapTableWithKeyOptions:NSPointerFunctionsStrongMemory
-                                                     valueOptions:NSPointerFunctionsWeakMemory];
-        self.hbBannerDelegates = [NSMapTable mapTableWithKeyOptions:NSPointerFunctionsStrongMemory
-                                                       valueOptions:NSPointerFunctionsWeakMemory];
         self.isAdPlaying = NO;
     }
     return self;
@@ -267,23 +259,14 @@ typedef NS_ENUM(NSUInteger, SDKInitializeState) {
 - (void)requestAdWithCustomEventInfo:(NSDictionary *)info
                             delegate:(id<VungleRouterDelegate>)delegate
 {
-    NSString *placementId = [delegate getPlacementID];
-    NSString *eventId = [delegate getEventId];
-    if (eventId.length > 0) {
-        if (![self.hbDelegatesDict objectForKey:eventId]) {
-            [self.hbDelegatesDict setObject:delegate forKey:eventId];
-        }
-    } else {
-        if (![self.delegatesDict objectForKey:placementId]) {
-            [self.delegatesDict setObject:delegate forKey:placementId];
-        }
-    }
+    [self setDelegateIntoTable:self.delegatesDict delegate:delegate];
     
     if ([self isAdAvailableForDelegate:delegate]) {
         [delegate vungleAdDidLoad];
         return;
     }
 
+    NSString *placementId = [delegate getPlacementID];
     NSError *error = nil;
     if ([[VungleSDK sharedSDK] loadPlacementWithID:placementId adMarkup:[delegate getAdMarkup] error:&error]) {
         MPLogInfo(@"Vungle: Start to load an ad for Placement ID :%@", placementId);
@@ -298,19 +281,9 @@ typedef NS_ENUM(NSUInteger, SDKInitializeState) {
 - (void)requestBannerAdWithDelegate:(id<VungleRouterDelegate>)delegate
 {
     @synchronized (self) {
-        NSString *placementID = [delegate getPlacementID];
-        NSString *eventId = [delegate getEventId];
-        CGSize size = [delegate getBannerSize];
-        if (eventId.length > 0) {
-            if (![self.hbBannerDelegates objectForKey:eventId]) {
-                [self.hbBannerDelegates setObject:delegate forKey:eventId];
-            }
-        } else {
-            if (![self.bannerDelegates objectForKey:placementID]) {
-                [self.bannerDelegates setObject:delegate forKey:placementID];
-            }
-        }
+        [self setDelegateIntoTable:self.bannerDelegates delegate:delegate];
         
+        NSString *placementID = [delegate getPlacementID];
         if ([self isBannerAdAvailableForDelegate:delegate]) {
             MPLogInfo(@"Vungle: Banner ad already cached for Placement ID :%@", placementID);
             delegate.bannerState = BannerRouterDelegateStateCached;
@@ -318,6 +291,7 @@ typedef NS_ENUM(NSUInteger, SDKInitializeState) {
         } else {
             delegate.bannerState = BannerRouterDelegateStateRequesting;
             
+            CGSize size = [delegate getBannerSize];
             NSError *error = nil;
             if (CGSizeEqualToSize(size, kVNGMRECSize)) {
                 if ([[VungleSDK sharedSDK] loadPlacementWithID:placementID adMarkup:[delegate getAdMarkup] error:&error]) {
@@ -530,6 +504,20 @@ typedef NS_ENUM(NSUInteger, SDKInitializeState) {
     return isValid;
 }
 
+- (NSString *)getKeyFromDelegate:(id<VungleRouterDelegate>)delegate
+{
+    return [NSString stringWithFormat:@"%@|%@", [delegate getPlacementID], [delegate getEventId]];
+}
+
+- (void)setDelegateIntoTable:(NSMapTable *)table
+                    delegate:(id<VungleRouterDelegate>)delegate
+{
+    NSString *key = [self getKeyFromDelegate:delegate];
+    if (![table objectForKey:key]) {
+        [table setObject:delegate forKey:key];
+    }
+}
+
 - (void)clearBannerDelegateWithState:(BannerRouterDelegateState)state
 {
     @synchronized (self) {
@@ -539,53 +527,29 @@ typedef NS_ENUM(NSUInteger, SDKInitializeState) {
                 [self.bannerDelegates removeObjectForKey:key];
             }
         }
-        array = [self.hbBannerDelegates.keyEnumerator allObjects];
-        for (NSString *key in array) {
-            if ([[self.hbBannerDelegates objectForKey:key] bannerState] == state) {
-                [self.hbBannerDelegates removeObjectForKey:key];
-            }
-        }
     }
 }
 
 - (void)cleanupFullScreenDelegate:(id<VungleRouterDelegate>)delegate
 {
     @synchronized (self) {
-        NSString *placementID = [delegate getPlacementID];
-        NSString *eventID = [delegate getEventId];
-        if (eventID.length > 0) {
-            [self.hbDelegatesDict removeObjectForKey:eventID];
-        } else if (placementID.length > 0) {
-            [self.delegatesDict removeObjectForKey:placementID];
-        }
+        NSString *key = [self getKeyFromDelegate:delegate];
+        [self.delegatesDict removeObjectForKey:key];
     }
 }
 
 - (void)addToWaitingListWithDelegate:(id<VungleRouterDelegate>)delegate
 {
-    NSString *eventId = [delegate getEventId];
-    if (eventId.length > 0) {
-        if (![self.hbWaitingListDict objectForKey:eventId]) {
-            [self.hbWaitingListDict setObject:delegate forKey:eventId];
-        }
-    } else {
-        NSString *placementId = [delegate getPlacementID];
-        if (![self.waitingListDict objectForKey:placementId]) {
-            [self.waitingListDict setObject:delegate forKey:placementId];
-        }
+    NSString *key = [self getKeyFromDelegate:delegate];
+    if (![self.waitingListDict objectForKey:key]) {
+        [self.waitingListDict setObject:delegate forKey:key];
     }
 }
 
 - (void)clearWaitingList
 {
-    [self requestAdsInWaitingListDictionary:self.waitingListDict];
-    [self requestAdsInWaitingListDictionary:self.hbWaitingListDict];
-}
-
-- (void)requestAdsInWaitingListDictionary:(NSMutableDictionary *)waitingListDict
-{
-    for (id key in waitingListDict) {
-        id<VungleRouterDelegate> delegateInstance = [waitingListDict objectForKey:key];
+    for (id key in self.waitingListDict) {
+        id<VungleRouterDelegate> delegateInstance = [self.waitingListDict objectForKey:key];
         
         if ([delegateInstance respondsToSelector:@selector(getBannerSize)]) {
             [self requestBannerAdWithDelegate:delegateInstance];
@@ -593,8 +557,7 @@ typedef NS_ENUM(NSUInteger, SDKInitializeState) {
             [self requestAdWithCustomEventInfo:nil delegate:delegateInstance];
         }
     }
-
-    [waitingListDict removeAllObjects];
+    [self.waitingListDict removeAllObjects];
 }
 
 - (void)requestBannerAdFailedWithError:(NSError *)error
@@ -642,11 +605,14 @@ typedef NS_ENUM(NSUInteger, SDKInitializeState) {
 - (id<VungleRouterDelegate>)getFullScreenDelegateWithPlacement:(NSString *)placementID
                                                        eventID:(NSString *)eventID
 {
-    if (eventID.length > 0) {
-        return [self.hbDelegatesDict objectForKey:eventID];
+    if (!placementID.length && !eventID.length) {
+        return nil;
     }
-    if (placementID.length) {
-        return [self.delegatesDict objectForKey:placementID];
+    NSString *identifier = eventID ?: placementID;
+    for(NSString *key in self.delegatesDict) {
+        if ([key containsString:identifier]) {
+            return [self.delegatesDict objectForKey:key];
+        }
     }
     return nil;
 }
@@ -654,11 +620,14 @@ typedef NS_ENUM(NSUInteger, SDKInitializeState) {
 - (id<VungleRouterDelegate>)getBannerDelegateWithPlacement:(NSString *)placementID
                                                    eventID:(NSString *)eventID
 {
-    if (eventID.length > 0) {
-        return [self.hbBannerDelegates objectForKey:eventID];
+    if (!placementID.length && !eventID.length) {
+        return nil;
     }
-    if (placementID.length) {
-        return [self.bannerDelegates objectForKey:placementID];
+    NSString *identifier = eventID ?: placementID;
+    for(NSString *key in self.bannerDelegates) {
+        if ([key containsString:identifier]) {
+            return [self.bannerDelegates objectForKey:key];
+        }
     }
     return nil;
 }
@@ -678,17 +647,9 @@ typedef NS_ENUM(NSUInteger, SDKInitializeState) {
 - (void)replaceOldBannerDelegateWithDelegate:(id<VungleRouterDelegate>)delegate
 {
     @synchronized (self) {
-        NSString *key = [delegate getEventId];
-        NSMapTable<NSString *, id<VungleRouterDelegate>> *delegateTable;
-        if (key.length > 0) {
-            delegateTable = self.hbBannerDelegates;
-        } else {
-            key = [delegate getPlacementID];
-            delegateTable = self.bannerDelegates;
-        }
         id<VungleRouterDelegate> bannerDelegate = [self getBannerDelegateWithPlacement:[delegate getPlacementID] eventID:[delegate getEventId]];
         if (bannerDelegate != delegate) {
-            [delegateTable setObject:delegate forKey:key];
+            [self.bannerDelegates setObject:delegate forKey:[self getKeyFromDelegate:delegate]];
         }
     }
 }
@@ -710,16 +671,6 @@ typedef NS_ENUM(NSUInteger, SDKInitializeState) {
         return;
     }
     [self vungleAdPlayabilityUpdate:isAdPlayable placementID:placementID eventID:nil error:error];
-}
-
-- (void)vungleAdPlayabilityUpdate:(BOOL)isAdPlayable
-                          eventID:(nullable NSString *)eventID
-                            error:(nullable NSError *)error
-{
-    if (!eventID.length) {
-        return;
-    }
-    [self vungleAdPlayabilityUpdate:isAdPlayable placementID:nil eventID:eventID error:error];
 }
 
 - (void)vungleAdPlayabilityUpdate:(BOOL)isAdPlayable
@@ -776,14 +727,6 @@ typedef NS_ENUM(NSUInteger, SDKInitializeState) {
     [self vungleWillShowAdForPlacementID:placementID eventID:nil];
 }
 
-- (void)vungleWillShowAdForEventID:(nullable NSString *)eventID
-{
-    if (!eventID.length) {
-        return;
-    }
-    [self vungleWillShowAdForPlacementID:nil eventID:eventID];
-}
-
 - (void)vungleWillShowAdForPlacementID:(NSString *)placementID
                                eventID:(NSString *)eventID
 {
@@ -810,11 +753,6 @@ typedef NS_ENUM(NSUInteger, SDKInitializeState) {
     [self vungleDidShowAdForPlacementID:placementID eventID:nil];
 }
 
-- (void)vungleDidShowAdForEventID:(nullable NSString *)eventID
-{
-    [self vungleDidShowAdForPlacementID:nil eventID:eventID];
-}
-
 - (void)vungleDidShowAdForPlacementID:(NSString *)placementID
                               eventID:(NSString *)eventID
 {
@@ -830,14 +768,6 @@ typedef NS_ENUM(NSUInteger, SDKInitializeState) {
         return;
     }
     [self vungleAdViewedForPlacement:placementID eventID:nil];
-}
-
-- (void)vungleAdViewedForAdUnit:(nullable NSString *)eventID
-{
-    if (!eventID.length) {
-        return;
-    }
-    [self vungleAdViewedForPlacement:nil eventID:eventID];
 }
 
 - (void)vungleAdViewedForPlacement:(NSString *)placementID
@@ -860,11 +790,6 @@ typedef NS_ENUM(NSUInteger, SDKInitializeState) {
     [self vungleWillCloseAdForPlacementID:placementID eventID:nil];
 }
 
-- (void)vungleWillCloseAdForEventID:(nonnull NSString *)eventID
-{
-    [self vungleWillCloseAdForPlacementID:nil eventID:eventID];
-}
-
 - (void)vungleWillCloseAdForPlacementID:(NSString *)placementID
                                 eventID:(NSString *)eventID
 {
@@ -881,14 +806,6 @@ typedef NS_ENUM(NSUInteger, SDKInitializeState) {
         return;
     }
     [self vungleDidCloseAdForPlacementID:placementID eventID:nil];
-}
-
-- (void)vungleDidCloseAdForEventID:(nonnull NSString *)eventID
-{
-    if (!eventID.length) {
-        return;
-    }
-    [self vungleDidCloseAdForPlacementID:nil eventID:eventID];
 }
 
 - (void)vungleDidCloseAdForPlacementID:(NSString *)placementID
@@ -921,14 +838,6 @@ typedef NS_ENUM(NSUInteger, SDKInitializeState) {
     [self vungleTrackClickForPlacementID:placementID eventID:nil];
 }
 
-- (void)vungleTrackClickForEventID:(nullable NSString *)eventID
-{
-    if (!eventID.length) {
-        return;
-    }
-    [self vungleTrackClickForPlacementID:nil eventID:eventID];
-}
-
 - (void)vungleTrackClickForPlacementID:(NSString *)placementID
                                eventID:(NSString *)eventID
 {
@@ -941,11 +850,6 @@ typedef NS_ENUM(NSUInteger, SDKInitializeState) {
 - (void)vungleRewardUserForPlacementID:(nullable NSString *)placementID
 {
     [self vungleRewardUserForPlacementID:placementID eventID:nil];
-}
-
-- (void)vungleRewardUserForEventID:(nullable NSString *)eventID
-{
-    [self vungleRewardUserForPlacementID:nil eventID:eventID];
 }
 
 - (void)vungleRewardUserForPlacementID:(NSString *)placementID
@@ -962,11 +866,6 @@ typedef NS_ENUM(NSUInteger, SDKInitializeState) {
     [self vungleWillLeaveApplicationForPlacementID:placementID eventID:nil];
 }
 
-- (void)vungleWillLeaveApplicationForEventID:(nullable NSString *)eventID
-{
-    [self vungleWillLeaveApplicationForPlacementID:nil eventID:eventID];
-}
-
 - (void)vungleWillLeaveApplicationForPlacementID:(NSString *)placementID
                                          eventID:(NSString *)eventID
 {
@@ -974,6 +873,70 @@ typedef NS_ENUM(NSUInteger, SDKInitializeState) {
                                                                      eventID:eventID
                                                              withBannerState:BannerRouterDelegateStatePlaying];
     [targetDelegate vungleAdWillLeaveApplication];
+}
+
+#pragma mark - VungleSDKHBDelegate Methods
+
+- (void)vungleAdPlayabilityUpdate:(BOOL)isAdPlayable
+                          eventID:(nullable NSString *)eventID
+                            error:(nullable NSError *)error
+{
+    if (!eventID.length) {
+        return;
+    }
+    [self vungleAdPlayabilityUpdate:isAdPlayable placementID:nil eventID:eventID error:error];
+}
+
+- (void)vungleWillShowAdForEventID:(nullable NSString *)eventID
+{
+    if (!eventID.length) {
+        return;
+    }
+    [self vungleWillShowAdForPlacementID:nil eventID:eventID];
+}
+
+- (void)vungleDidShowAdForEventID:(nullable NSString *)eventID
+{
+    [self vungleDidShowAdForPlacementID:nil eventID:eventID];
+}
+
+- (void)vungleAdViewedForAdUnit:(nullable NSString *)eventID
+{
+    if (!eventID.length) {
+        return;
+    }
+    [self vungleAdViewedForPlacement:nil eventID:eventID];
+}
+
+- (void)vungleWillCloseAdForEventID:(nonnull NSString *)eventID
+{
+    [self vungleWillCloseAdForPlacementID:nil eventID:eventID];
+}
+
+- (void)vungleDidCloseAdForEventID:(nonnull NSString *)eventID
+{
+    if (!eventID.length) {
+        return;
+    }
+    [self vungleDidCloseAdForPlacementID:nil eventID:eventID];
+}
+
+- (void)vungleTrackClickForEventID:(nullable NSString *)eventID
+{
+    if (!eventID.length) {
+        return;
+    }
+    [self vungleTrackClickForPlacementID:nil eventID:eventID];
+}
+
+- (void)vungleRewardUserForEventID:(nullable NSString *)eventID
+{
+    [self vungleRewardUserForPlacementID:nil eventID:eventID];
+}
+
+- (void)vungleWillLeaveApplicationForEventID:(nullable NSString *)eventID
+{
+    [self vungleWillLeaveApplicationForPlacementID:nil eventID:eventID];
 }
 
 #pragma mark - VungleSDKNativeAds delegate methods
