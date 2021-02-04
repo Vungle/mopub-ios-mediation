@@ -541,10 +541,12 @@ typedef NS_ENUM(NSUInteger, SDKInitializeState) {
 - (void)removeDelegatesIfContainsPlacement:(NSString *)placementID
                                 dictionary:(NSMutableDictionary *)dictionary
 {
-    NSArray *array = [dictionary.keyEnumerator allObjects];
-    for (NSString *key in array) {
-        if ([key containsString:placementID]) {
-            [dictionary removeObjectForKey:key];
+    @synchronized (self) {
+        NSArray *array = [dictionary.keyEnumerator allObjects];
+        for (NSString *key in array) {
+            if ([key containsString:placementID]) {
+                [dictionary removeObjectForKey:key];
+            }
         }
     }
 }
@@ -552,10 +554,12 @@ typedef NS_ENUM(NSUInteger, SDKInitializeState) {
 - (void)removeDelegatesIfContainsPlacement:(NSString *)placementID
                                      table:(NSMapTable *)table
 {
-    NSArray *array = [table.keyEnumerator allObjects];
-    for (NSString *key in array) {
-        if ([key containsString:placementID]) {
-            [table removeObjectForKey:key];
+    @synchronized (self) {
+        NSArray *array = [table.keyEnumerator allObjects];
+        for (NSString *key in array) {
+            if ([key containsString:placementID]) {
+                [table removeObjectForKey:key];
+            }
         }
     }
 }
