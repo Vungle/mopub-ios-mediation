@@ -434,8 +434,9 @@ typedef NS_ENUM(NSUInteger, SDKInitializeState) {
     @synchronized (self) {
         NSString *placementID = [newDelegate getPlacementID];
         id<VungleRouterDelegate> oldDelegate;
-        for(NSString *key in self.bannerDelegates) {
-            oldDelegate = [self.bannerDelegates objectForKey:key];
+        NSMapTable<NSString *, id<VungleRouterDelegate>> *bannerDelegatesCopy = [self.bannerDelegates mutableCopy];
+        for(NSString *key in bannerDelegatesCopy) {
+            oldDelegate = [bannerDelegatesCopy objectForKey:key];
             if ([key containsString:placementID] && [oldDelegate bannerState] == BannerRouterDelegateStatePlaying) {
                 BOOL isHeaderBidding = [newDelegate getEventId] || [oldDelegate getEventId];
                 if (isHeaderBidding && [oldDelegate getEventId] == [newDelegate getEventId]) {
@@ -444,9 +445,9 @@ typedef NS_ENUM(NSUInteger, SDKInitializeState) {
                 MPLogInfo(@"Vungle: Triggering a Banner ad completion call in refresh for %@ eventID: %@", placementID, [oldDelegate getEventId]);
                 [[VungleSDK sharedSDK] finishDisplayingAd:placementID adMarkup:[oldDelegate getAdMarkup]];
                 oldDelegate.bannerState = BannerRouterDelegateStateClosing;
+                [self.bannerDelegates removeObjectForKey:[self getKeyFromDelegate:oldDelegate]];
             }
         }
-        [self.bannerDelegates removeObjectForKey:[self getKeyFromDelegate:oldDelegate]];
     }
 }
 
