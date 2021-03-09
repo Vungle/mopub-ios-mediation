@@ -332,7 +332,7 @@ typedef NS_ENUM(NSUInteger, SDKInitializeState) {
 }
 
 - (NSString *)currentSuperToken {
-    return [[VungleSDK sharedSDK] currentSuperToken];
+    return [[VungleSDK sharedSDK] currentSuperTokenForSize:1000];
 }
 
 - (void)presentInterstitialAdFromViewController:(UIViewController *)viewController
