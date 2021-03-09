@@ -20,7 +20,6 @@ extern NSString *const kVungleSDKCollectDevice;
 extern NSString *const kVungleSDKMinSpaceForInit;
 extern NSString *const kVungleSDKMinSpaceForAdRequest;
 extern NSString *const kVungleSDKMinSpaceForAssetLoad;
-extern NSString *const kVungleAdEventId;
 
 extern const CGSize kVNGMRECSize;
 extern const CGSize kVNGBannerSize;
@@ -54,8 +53,6 @@ extern const CGSize kVNGLeaderboardBannerSize;
 - (VungleConsentStatus) getCurrentConsentStatus;
 - (void)cleanupFullScreenDelegate:(id<VungleRouterDelegate>)delegate;
 - (void)clearDelegateForRequestingBanner;
-- (NSString *)parseEventId:(NSString *)adMarkup;
-
 @end
 
 typedef NS_ENUM(NSUInteger, BannerRouterDelegateState) {
@@ -81,7 +78,6 @@ typedef NS_ENUM(NSUInteger, BannerRouterDelegateState) {
 - (void)vungleAdDidFailToLoad:(NSError *)error;
 - (NSString *)getPlacementID;
 - (NSString *)getAdMarkup;
-- (NSString *)getEventId;
 
 @optional
 
