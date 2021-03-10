@@ -727,7 +727,7 @@ typedef NS_ENUM(NSUInteger, SDKInitializeState) {
 
 - (void)vungleWillCloseAdForPlacementID:(nonnull NSString *)placementID
 {
-    [self vungleWillCloseAdForPlacementID:placementID adMarkup:@""];
+    [self vungleWillCloseAdForPlacementID:placementID adMarkup:nil];
 }
 
 - (void)vungleDidCloseAdForPlacementID:(nonnull NSString *)placementID
@@ -735,7 +735,7 @@ typedef NS_ENUM(NSUInteger, SDKInitializeState) {
     if (!placementID.length) {
         return;
     }
-    [self vungleDidCloseAdForPlacementID:placementID adMarkup:@""];
+    [self vungleDidCloseAdForPlacementID:placementID adMarkup:nil];
 }
 
 - (void)vungleTrackClickForPlacementID:(nullable NSString *)placementID
