@@ -42,7 +42,7 @@ typedef NS_ENUM(NSUInteger, SDKInitializeState) {
 @interface VungleRouter () <VungleSDKDelegate, VungleSDKNativeAds, VungleSDKHBDelegate>
 
 @property (nonatomic, copy) NSString *vungleAppID;
-@property (nonatomic) id<VungleRouterDelegate> playingFullScreenAdDelegate;
+@property (nonatomic, weak) id<VungleRouterDelegate> playingFullScreenAdDelegate;
 @property (nonatomic) SDKInitializeState sdkInitializeState;
 
 @property (nonatomic) NSMutableDictionary *waitingListDict;
@@ -764,7 +764,9 @@ typedef NS_ENUM(NSUInteger, SDKInitializeState) {
 {
     NSString *message = nil;
     NSError *playabilityError = nil;
-    if (!isAdPlayable) {
+    if (isAdPlayable) {
+        MPLogInfo(@"Vungle: Ad playability update returned ad is playable for Placement ID: %@", placementID);
+    } else {
         message = error ? [NSString stringWithFormat:@"Vungle: Ad playability update returned error for Placement ID: %@, Error: %@", placementID, error.localizedDescription] : [NSString stringWithFormat:@"Vungle: Ad playability update returned Ad is not playable for Placement ID: %@.", placementID];
         playabilityError = error ? : [NSError errorWithCode:MOPUBErrorAdapterFailedToLoadAd localizedDescription:message];
     }
@@ -773,7 +775,6 @@ typedef NS_ENUM(NSUInteger, SDKInitializeState) {
                                                                               adMarkup:adMarkup];
     if (targetDelegate) {
         if (isAdPlayable) {
-            MPLogInfo(@"Vungle: Ad playability update returned ad is playable for Placement ID: %@", placementID);
             [targetDelegate vungleAdDidLoad];
         } else {
             MPLogInfo(@"%@", message);
@@ -781,8 +782,8 @@ typedef NS_ENUM(NSUInteger, SDKInitializeState) {
             // The SDK will fire playability updates during a successful playback
             // to relay the status. We don't want to trigger the fail load if it
             // is successfully playing. But don't block other placement load fails
-            if ([self.playingFullScreenAdDelegate getPlacementID] != placementID &&
-                [self.playingFullScreenAdDelegate getAdMarkup] != adMarkup) {
+            if ([[self.playingFullScreenAdDelegate getPlacementID] isEqualToString:placementID] &&
+                [[self.playingFullScreenAdDelegate getAdMarkup] isEqualToString:adMarkup]) {
                 [targetDelegate vungleAdDidFailToLoad:playabilityError];
             }
         }
@@ -794,7 +795,6 @@ typedef NS_ENUM(NSUInteger, SDKInitializeState) {
                                  withBannerState:BannerRouterDelegateStateRequesting];
             if (bannerDelegate) {
                 if (isAdPlayable) {
-                    MPLogInfo(@"Vungle: Ad playability update returned ad is playable for Placement ID: %@", placementID);
                     [bannerDelegate vungleAdDidLoad];
                     bannerDelegate.bannerState = BannerRouterDelegateStateCached;
                 } else {
