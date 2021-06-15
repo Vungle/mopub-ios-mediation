@@ -782,8 +782,8 @@ typedef NS_ENUM(NSUInteger, SDKInitializeState) {
             // The SDK will fire playability updates during a successful playback
             // to relay the status. We don't want to trigger the fail load if it
             // is successfully playing. But don't block other placement load fails
-            if ([[self.playingFullScreenAdDelegate getPlacementID] isEqualToString:placementID] &&
-                [[self.playingFullScreenAdDelegate getAdMarkup] isEqualToString:adMarkup]) {
+            if (!([[self.playingFullScreenAdDelegate getPlacementID] isEqualToString:placementID] &&
+                [[self.playingFullScreenAdDelegate getAdMarkup] isEqualToString:adMarkup])) {
                 [targetDelegate vungleAdDidFailToLoad:playabilityError];
             }
         }
